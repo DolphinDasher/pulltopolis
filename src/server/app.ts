@@ -24,7 +24,7 @@ export function createApp(status: AppStatus, services: AppServices = {}): expres
   app.use((_request, response, next) => {
     response.set({
       "Content-Security-Policy":
-        "default-src 'self'; connect-src 'self'; img-src 'self' data: https://avatars.githubusercontent.com; script-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+        "default-src 'self'; connect-src 'self'; img-src 'self' blob: data: https://avatars.githubusercontent.com; script-src 'self'; style-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
       "Permissions-Policy": "camera=(), geolocation=(), microphone=()",
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "X-Content-Type-Options": "nosniff",

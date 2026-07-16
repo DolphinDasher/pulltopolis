@@ -21,7 +21,7 @@ test("health endpoint reports capability state without secrets", async () => {
     assert.doesNotMatch(JSON.stringify(body), /token/i);
     assert.equal(response.headers.get("x-content-type-options"), "nosniff");
     assert.equal(response.headers.get("x-frame-options"), "DENY");
-    assert.match(response.headers.get("content-security-policy") ?? "", /default-src 'self'/);
+    assert.match(response.headers.get("content-security-policy") ?? "", /img-src 'self' blob:/);
   } finally {
     await new Promise<void>((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve())),
