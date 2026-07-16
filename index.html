@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Explore a public GitHub profile as a pixel-art repository town."
+    />
+    <title>PullTopolis · Your GitHub repository town</title>
+    <script type="module" src="/src/client/main.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#town-summary">Skip to town details</a>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">GitHub profile visualizer</p>
+        <h1>PullTopolis</h1>
+        <p class="tagline">Every repository has a place in town.</p>
+      </div>
+
+      <form id="town-search" class="town-search" role="search">
+        <label for="github-login">GitHub username or @username</label>
+        <div class="search-row">
+          <input
+            id="github-login"
+            name="login"
+            type="text"
+            inputmode="text"
+            autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
+            maxlength="40"
+            pattern="@?[A-Za-z0-9](?:[A-Za-z0-9\-]{0,37}[A-Za-z0-9])?"
+            placeholder="@octocat"
+            required
+          />
+          <button type="submit">Build town</button>
+        </div>
+      </form>
+    </header>
+
+    <main>
+      <div id="request-status" class="request-status" role="status" aria-live="polite">
+        Enter a public GitHub username, with or without @, to visit their town.
+      </div>
+
+      <section id="town-view" class="town-view" hidden aria-labelledby="town-heading">
+        <div class="town-stage panel">
+          <div class="stage-heading">
+            <div>
+              <p id="snapshot-freshness" class="eyebrow"></p>
+              <h2 id="town-heading"></h2>
+            </div>
+            <label class="motion-toggle">
+              <input id="reduce-motion" type="checkbox" />
+              Reduce motion
+            </label>
+          </div>
+          <div class="canvas-frame">
+            <canvas
+              id="town-canvas"
+              width="384"
+              height="256"
+              role="img"
+              aria-label="Repository town. Use the repository buttons after the canvas to inspect buildings."
+            >
+              PullTopolis needs a browser with Canvas 2D support. Repository details remain available below.
+            </canvas>
+          </div>
+          <p class="canvas-help">Select a building on the canvas or use the repository buttons below.</p>
+        </div>
+
+        <aside class="town-sidebar">
+          <section id="profile-summary" class="panel profile-summary" aria-label="Profile summary"></section>
+          <section id="contribution-summary" class="panel contribution-summary" aria-label="Contribution garden summary"></section>
+          <section class="panel companion-summary" aria-labelledby="companion-heading">
+            <p class="eyebrow">Resident companion</p>
+            <h2 id="companion-heading">Starter mascot</h2>
+            <p>A casual GitHub-inspired companion joins every town for free.</p>
+            <span class="status-chip">Free · equipped</span>
+          </section>
+        </aside>
+
+        <section class="panel readme-card" aria-labelledby="readme-card-heading">
+          <div class="readme-card-copy">
+            <p class="eyebrow">Share your city</p>
+            <h2 id="readme-card-heading">README town card</h2>
+            <p>Download a self-contained SVG, commit it beside your README, and paste the Markdown reference.</p>
+            <div class="card-actions">
+              <a id="download-town-card" class="button-action" aria-disabled="true">Download SVG</a>
+              <button id="copy-town-card-markdown" class="secondary-action" type="button" disabled>Copy Markdown</button>
+            </div>
+            <code id="town-card-markdown" class="town-card-markdown">Load a town to generate its card.</code>
+            <p id="town-card-feedback" class="card-feedback" role="status" aria-live="polite"></p>
+          </div>
+          <figure class="readme-card-preview">
+            <img id="town-card-preview" width="800" height="260" alt="" decoding="async" />
+            <figcaption>Generated locally from this public snapshot. No remote assets are embedded.</figcaption>
+          </figure>
+        </section>
+
+        <section id="town-summary" class="panel town-summary" tabindex="-1">
+          <div>
+            <p class="eyebrow">Buildings</p>
+            <h2>Repository directory</h2>
+          </div>
+          <div id="repository-groups"></div>
+        </section>
+
+        <section id="repository-detail" class="panel repository-detail" aria-live="polite">
+          <p>Select a repository building to inspect its GitHub stats.</p>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <p>Public GitHub data becomes a deterministic town. Starlight is display-only in this MVP.</p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="260" viewBox="0 0 800 260" role="img" aria-labelledby="pulltopolis-title pulltopolis-description" shape-rendering="crispEdges">
+  <title id="pulltopolis-title">Maurice&apos;s PullTopolis town</title>
+  <desc id="pulltopolis-description">A deterministic repository town for @DolphinDasher, representing 1 public repositories. 0 are GitHub-reported recently contributed-to repositories.</desc>
+  <rect width="800" height="260" rx="12" fill="#fffdf5"/>
+  <rect x="3" y="3" width="794" height="254" rx="10" fill="none" stroke="#17233d" stroke-width="6"/>
+  <path d="M6 160H794V254H6Z" fill="#8fcf8b"/>
+  <path d="M6 160H794" stroke="#17233d" stroke-width="4"/>
+  <path d="M6 20H794M6 52H794M6 84H794M6 116H794M38 6V160M70 6V160M102 6V160M134 6V160M166 6V160M198 6V160M230 6V160M262 6V160M294 6V160M326 6V160M358 6V160M390 6V160M422 6V160M454 6V160M486 6V160M518 6V160M550 6V160M582 6V160M614 6V160M646 6V160M678 6V160M710 6V160M742 6V160M774 6V160" stroke="#ffffff" stroke-opacity="0.24"/>
+  <text x="30" y="43" fill="#b94e55" font-family="system-ui, sans-serif" font-size="13" font-weight="800" letter-spacing="2">PULLTOPOLIS TOWN CARD</text>
+  <text x="30" y="78" fill="#17233d" font-family="system-ui, sans-serif" font-size="25" font-weight="900">Maurice&apos;s PullTopolis town</text>
+  <text x="30" y="104" fill="#43506b" font-family="system-ui, sans-serif" font-size="15" font-weight="700">@DolphinDasher &#183; snapshot 2026-07-16</text>
+  <rect x="30" y="122" width="274" height="31" fill="#fff3c5" stroke="#17233d" stroke-width="3"/>
+  <text x="42" y="143" fill="#17233d" font-family="system-ui, sans-serif" font-size="13" font-weight="800">1 owned &#183; 0 recently contributed</text>
+  <rect x="30" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="44" y="174" width="10" height="10" fill="#b9dc9d" stroke="#17233d" stroke-width="1"/>
+  <rect x="58" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="72" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="86" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="100" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="114" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="128" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="142" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="156" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="170" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="184" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="198" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="212" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="226" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="240" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="254" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="268" y="174" width="10" height="10" fill="#d9edcb" stroke="#17233d" stroke-width="1"/>
+  <rect x="282" y="174" width="10" height="10" fill="#8fcf8b" stroke="#17233d" stroke-width="1"/>
+  <rect x="296" y="174" width="10" height="10" fill="#b9dc9d" stroke="#17233d" stroke-width="1"/>
+  <text x="30" y="229" fill="#17233d" font-family="system-ui, sans-serif" font-size="13" font-weight="800">Python</text>
+  <text x="30" y="247" fill="#43506b" font-family="system-ui, sans-serif" font-size="11">1 public repositories represented</text>
+  <path d="M328 29L344 13L360 29V55H328Z" fill="#f17f72" stroke="#17233d" stroke-width="4"/>
+  <rect x="340" y="39" width="8" height="16" fill="#f6c65b" stroke="#17233d" stroke-width="2"/>
+  <g data-repository-building="R_kgDOR7JukQ">
+    <path d="M364 173L380 161L396 173Z" fill="#f17f72" stroke="#17233d" stroke-width="3"/>
+    <rect x="368" y="173" width="24" height="43" fill="#76b7c7" stroke="#17233d" stroke-width="3"/>
+    <rect x="373" y="183" width="7" height="7" fill="#f6c65b" stroke="#17233d" stroke-width="2"/>
+    <rect x="380" y="183" width="7" height="7" fill="#f6c65b" stroke="#17233d" stroke-width="2"/>
+    <rect x="376" y="201" width="8" height="15" fill="#fff3c5" stroke="#17233d" stroke-width="2"/>
+    <rect x="370" y="211" width="20" height="5" fill="#b94e55"/>
+    <text x="380" y="202" fill="#17233d" font-family="system-ui, sans-serif" font-size="9" font-weight="900" text-anchor="middle">&#8230;</text>
+  </g>
+  <path d="M326 218H780" stroke="#17233d" stroke-width="4"/>
+  <text x="566" y="244" fill="#43506b" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Identity over leaderboard &#183; public GitHub data</text>
+</svg>

@@ -1,0 +1,24 @@
+# Editors and operating systems
+.idea/
+.DS_Store
+Thumbs.db
+
+# Dependencies, build output, test output, and local data
+node_modules/
+dist/
+coverage/
+data/
+*.tsbuildinfo
+*.log
+
+# Local configuration and secrets
+.env*
+!.env.example
+
+# Local agent/Codex state
+.agents/
+.codex/
+
+# Internal project records stay local; the root README is the only public Markdown file.
+*.md
+!/README.md
