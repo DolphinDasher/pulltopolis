@@ -27,11 +27,12 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 80% 5rem, rgba(255, 243, 178, 0.72) 0 3rem, transparent 3.1rem),
-    linear-gradient(rgba(255, 255, 255, 0.34) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.34) 1px, transparent 1px),
-    linear-gradient(180deg, var(--sky) 0 18rem, #d9edcb 18rem 30rem, #f6eddd 42rem);
-  background-size: auto, 16px 16px, 16px 16px, auto;
+    radial-gradient(circle at 84% 5.5rem, rgba(255, 243, 178, 0.84) 0 2.8rem, rgba(255, 243, 178, 0.22) 2.9rem 4.4rem, transparent 4.5rem),
+    radial-gradient(ellipse at 14% 22rem, rgba(126, 194, 120, 0.28) 0 10rem, transparent 10.2rem),
+    linear-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.22) 1px, transparent 1px),
+    linear-gradient(180deg, var(--sky) 0 18rem, #cfe8d4 18rem 31rem, #f6eddd 42rem);
+  background-size: auto, auto, 16px 16px, 16px 16px, auto;
 }
 
 button,
@@ -72,6 +73,7 @@ footer {
 }
 
 .site-header {
+  position: relative;
   display: flex;
   align-items: end;
   justify-content: space-between;
@@ -227,9 +229,10 @@ button:disabled {
   min-width: 0;
   padding: 1rem;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.32) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.32) 1px, transparent 1px),
-    var(--paper);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.72), transparent 34%),
+    linear-gradient(rgba(169, 223, 233, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(169, 223, 233, 0.16) 1px, transparent 1px),
+    #fffaf0;
   background-size: 16px 16px;
 }
 
@@ -261,8 +264,8 @@ button:disabled {
   overflow-y: hidden;
   border: var(--line);
   border-radius: 3px;
-  background: var(--sky-deep);
-  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.25);
+  background: #6fb6ca;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.34), 4px 4px 0 rgba(23, 35, 61, 0.14);
 }
 
 #town-canvas {
@@ -298,6 +301,13 @@ button:disabled {
 .profile-summary,
 .contribution-summary {
   background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.6), transparent 46%),
+    var(--paper);
+}
+
+.profile-summary {
+  background:
+    linear-gradient(90deg, var(--coral) 0 3rem, var(--gold) 3rem 6rem, var(--grass) 6rem 9rem, transparent 9rem) top left / 100% 4px no-repeat,
     linear-gradient(135deg, rgba(255, 255, 255, 0.6), transparent 46%),
     var(--paper);
 }
@@ -351,6 +361,7 @@ dd {
 .companion-summary {
   background:
     linear-gradient(135deg, #fff3c5 0 56%, #f7d9ad 56% 100%);
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.32);
 }
 
 .garden-range,

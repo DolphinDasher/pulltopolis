@@ -22,7 +22,7 @@ const SOURCE = {
 } as unknown as GitHubUserData;
 
 test("service maps source data, caches only the snapshot, and uses the trailing window", async () => {
-  const database = openDatabase(":memory:");
+  const database = await openDatabase(":memory:");
   const cache = new SnapshotCache(database);
   const calls: Array<{ login: string; from: string; to: string }> = [];
   const service = new TownSnapshotService({
@@ -59,7 +59,7 @@ test("service maps source data, caches only the snapshot, and uses the trailing 
       login: "octocat",
       generatedAt: "2026-07-16T12:00:00.000Z",
     });
-    const stored = cache.get<Record<string, unknown>>(
+    const stored = await cache.get<Record<string, unknown>>(
       { login: "octocat", schemaVersion: 1, mappingVersion: 1 },
       NOW,
     );
@@ -76,9 +76,9 @@ test("service maps source data, caches only the snapshot, and uses the trailing 
 });
 
 test("service serves stale immediately and coalesces background refresh", async () => {
-  const database = openDatabase(":memory:");
+  const database = await openDatabase(":memory:");
   const cache = new SnapshotCache(database);
-  cache.put({
+  await cache.put({
     login: "octocat",
     schemaVersion: 1,
     mappingVersion: 1,
@@ -119,7 +119,7 @@ test("service serves stale immediately and coalesces background refresh", async 
     await new Promise<void>((resolve) => setImmediate(resolve));
     assert.deepEqual(
       (
-        cache.get<{ revision: string }>(
+        await cache.get<{ revision: string }>(
           { login: "octocat", schemaVersion: 1, mappingVersion: 1 },
           NOW,
         )
@@ -132,7 +132,7 @@ test("service serves stale immediately and coalesces background refresh", async 
 });
 
 test("service coalesces cold misses and translates transport failures", async () => {
-  const database = openDatabase(":memory:");
+  const database = await openDatabase(":memory:");
   const cache = new SnapshotCache(database);
   let calls = 0;
   const service = new TownSnapshotService({

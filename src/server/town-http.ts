@@ -1,5 +1,6 @@
 import type { Express, NextFunction, Request, Response } from "express";
 
+import type { RequestThrottle } from "./request-throttle.js";
 import {
   GitHubApiError,
   GitHubRateLimitError,
@@ -22,6 +23,7 @@ export class TownSnapshotUnavailableError extends Error {
 export function registerTownSnapshotRoute(
   app: Express,
   reader: TownSnapshotReader | null,
+  requestThrottle?: RequestThrottle,
 ): void {
   app.get(
     "/api/towns/:login",
@@ -30,6 +32,14 @@ export function registerTownSnapshotRoute(
         const login = normalizeGitHubLogin(
           typeof request.params.login === "string" ? request.params.login : "",
         );
+        if (requestThrottle) {
+          const decision = requestThrottle.check(request.ip ?? "unknown", login);
+          if (!decision.allowed) {
+            response.set("Retry-After", String(decision.retryAfterSeconds));
+            response.status(429).json({ error: "rate_limited" });
+            return;
+          }
+        }
         if (!reader) throw new TownSnapshotUnavailableError();
         const result = await reader.get(login);
         response.set("X-PullTopolis-Cache", result.cacheStatus).json(result.snapshot);
@@ -68,6 +78,12 @@ export function townApiErrorHandler(
     response.status(502).json({ error: "github_unavailable" });
     return;
   }
+  console.error(
+    JSON.stringify({
+      event: "api_error",
+      error: error instanceof Error ? error.name : "unknown",
+    }),
+  );
   response.status(500).json({ error: "internal_error" });
 }
 

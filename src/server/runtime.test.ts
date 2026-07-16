@@ -12,13 +12,17 @@ const CONFIG: ServerConfig = {
   host: "127.0.0.1",
   port: 3_000,
   databasePath: ":memory:",
+  trustProxy: 0,
+  requestWindowMs: 60_000,
+  requestLimitPerIp: 60,
+  requestLimitPerLogin: 20,
   githubRequestTimeoutMs: 10_000,
   githubRateLimitReserve: 100,
 };
 
-test("runtime activates town snapshots only when its server-side token exists", () => {
-  const withoutToken = createRuntime(CONFIG, { townSnapshots: TOWN_SNAPSHOT_RUNTIME_OPTIONS });
-  const withToken = createRuntime(
+test("runtime activates town snapshots only when its server-side token exists", async () => {
+  const withoutToken = await createRuntime(CONFIG, { townSnapshots: TOWN_SNAPSHOT_RUNTIME_OPTIONS });
+  const withToken = await createRuntime(
     { ...CONFIG, githubToken: "server-only-test-token" },
     { townSnapshots: TOWN_SNAPSHOT_RUNTIME_OPTIONS },
   );

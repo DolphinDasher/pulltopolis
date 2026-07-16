@@ -73,7 +73,7 @@ export class TownSnapshotService<TSnapshot> implements TownSnapshotReader<TSnaps
       schemaVersion: this.options.schemaVersion,
       mappingVersion: this.options.mappingVersion,
     };
-    const cached = this.options.cache.get<TSnapshot>(key, now);
+    const cached = await this.options.cache.get<TSnapshot>(key, now);
 
     if (cached?.freshness === "fresh") {
       return { snapshot: cached.payload, cacheStatus: "fresh" };
@@ -112,7 +112,7 @@ export class TownSnapshotService<TSnapshot> implements TownSnapshotReader<TSnaps
     const softExpiresAt = addMilliseconds(now, this.options.cachePolicy.softTtlMs);
     const hardExpiresAt = addMilliseconds(now, this.options.cachePolicy.hardTtlMs);
 
-    this.options.cache.put({
+    await this.options.cache.put({
       login,
       schemaVersion: this.options.schemaVersion,
       mappingVersion: this.options.mappingVersion,

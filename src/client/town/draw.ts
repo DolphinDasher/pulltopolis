@@ -27,6 +27,7 @@ export function renderTown(
   drawBackdrop(context, frame, state.reducedMotion);
   drawIsland(context);
   drawPaths(context);
+  drawLandscapeDetails(context, frame);
   drawDistrictSigns(context);
   drawContributionGarden(context, snapshot);
   drawCivicSquare(context, snapshot);
@@ -63,17 +64,19 @@ function drawBackdrop(
   context.fillRect(0, 0, TOWN_VIEWPORT.width, TOWN_VIEWPORT.height);
   context.fillStyle = TOWN_PALETTE.skyDeep;
   context.fillRect(0, 48, TOWN_VIEWPORT.width, 32);
-  context.fillStyle = TOWN_PALETTE.skyLight;
+  context.fillStyle = TOWN_PALETTE.skyHorizon;
   context.fillRect(0, 76, TOWN_VIEWPORT.width, 66);
 
   const drift = reducedMotion ? 0 : frame;
   drawCloud(context, 26 + drift, 20);
   drawCloud(context, 294 - drift, 31);
-  context.fillStyle = "#fff3b2";
+  context.fillStyle = TOWN_PALETTE.sun;
   context.fillRect(346, 14, 11, 11);
-  context.fillStyle = "#ffe28a";
   context.fillRect(349, 11, 5, 17);
   context.fillRect(343, 17, 17, 5);
+  context.fillStyle = "#fff3bf";
+  context.fillRect(339, 15, 2, 2);
+  context.fillRect(359, 23, 2, 2);
   context.fillStyle = TOWN_PALETTE.cloudShade;
   context.fillRect(0, 130, 64, 3);
   context.fillRect(320, 126, 64, 3);
@@ -108,11 +111,19 @@ function drawIsland(context: CanvasRenderingContext2D): void {
   context.fillStyle = TOWN_PALETTE.grassShadow;
   context.fillRect(8, 232, 52, 2);
   context.fillRect(326, 232, 50, 2);
+  context.fillStyle = TOWN_PALETTE.pathShade;
+  context.fillRect(26, 243, 70, 2);
+  context.fillRect(288, 243, 70, 2);
   context.fillStyle = TOWN_PALETTE.water;
   context.fillRect(4, 238, 20, 2);
   context.fillRect(360, 238, 20, 2);
   context.fillRect(64, 250, 38, 2);
   context.fillRect(282, 250, 38, 2);
+  context.fillStyle = TOWN_PALETTE.waterLight;
+  context.fillRect(7, 237, 14, 1);
+  context.fillRect(363, 237, 14, 1);
+  context.fillRect(69, 249, 28, 1);
+  context.fillRect(287, 249, 28, 1);
 }
 
 function drawPaths(context: CanvasRenderingContext2D): void {
@@ -125,14 +136,91 @@ function drawPaths(context: CanvasRenderingContext2D): void {
     context.fillRect(20, y - 1, 344, 2);
     context.fillStyle = TOWN_PALETTE.pathShade;
     for (let x = 28; x < 360; x += 32) context.fillRect(x, y + 2, 8, 1);
+    context.fillStyle = TOWN_PALETTE.pathMark;
+    for (let x = 36; x < 350; x += 48) context.fillRect(x, y - 2, 10, 1);
   }
   context.fillStyle = TOWN_PALETTE.pathLight;
   context.fillRect(190, 24, 4, 200);
   context.fillStyle = TOWN_PALETTE.pathShade;
   for (let y = 32; y < 218; y += 16) context.fillRect(183, y, 3, 5);
   polygon(context, [[159, 147], [192, 133], [225, 147], [192, 168]], TOWN_PALETTE.outline);
-  polygon(context, [[162, 147], [192, 136], [222, 147], [192, 165]], TOWN_PALETTE.pathLight);
+  polygon(context, [[162, 147], [192, 136], [222, 147], [192, 165]], TOWN_PALETTE.plaza);
   drawPlazaFountain(context);
+}
+
+function drawLandscapeDetails(context: CanvasRenderingContext2D, frame: number): void {
+  const treePositions = [
+    [15, 42], [15, 96], [15, 151], [15, 205],
+    [369, 42], [369, 96], [369, 151], [369, 205],
+  ] as const;
+  treePositions.forEach(([x, y], index) => drawTree(context, x, y, index % 2));
+
+  const flowerPatches = [
+    [28, 74, TOWN_PALETTE.flower], [30, 183, TOWN_PALETTE.flowerCool],
+    [349, 74, TOWN_PALETTE.flowerCool], [347, 183, TOWN_PALETTE.flower],
+    [151, 188, TOWN_PALETTE.flower], [232, 188, TOWN_PALETTE.flowerCool],
+  ] as const;
+  flowerPatches.forEach(([x, y, color], index) => drawFlowerPatch(context, x, y, color, index % 2));
+
+  drawLamp(context, 157, 177, frame);
+  drawLamp(context, 227, 177, frame + 1);
+  drawBench(context, 157, 199);
+  drawBench(context, 217, 199);
+}
+
+function drawTree(context: CanvasRenderingContext2D, x: number, y: number, variant: number): void {
+  context.fillStyle = TOWN_PALETTE.outline;
+  context.fillRect(x - 2, y + 9, 5, 8);
+  context.fillStyle = TOWN_PALETTE.treeDark;
+  context.fillRect(x - 7, y + 4, 15, 9);
+  context.fillRect(x - 4, y, 9, 6);
+  context.fillStyle = variant === 0 ? TOWN_PALETTE.tree : TOWN_PALETTE.treeLight;
+  context.fillRect(x - 5, y + 3, 11, 7);
+  context.fillRect(x - 2, y - 1, 6, 5);
+  context.fillStyle = TOWN_PALETTE.grassLight;
+  context.fillRect(x - 3, y + 1, 3, 2);
+  context.fillRect(x + 4, y + 6, 2, 2);
+  context.fillStyle = TOWN_PALETTE.grassShadow;
+  context.fillRect(x - 8, y + 16, 16, 2);
+}
+
+function drawFlowerPatch(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  color: string,
+  variant: number,
+): void {
+  context.fillStyle = TOWN_PALETTE.grassDark;
+  context.fillRect(x + 2, y + 4, 1, 5);
+  context.fillRect(x + 8, y + 2, 1, 7);
+  context.fillRect(x + 13, y + 4, 1, 5);
+  context.fillStyle = color;
+  context.fillRect(x, y + (variant ? 2 : 3), 5, 3);
+  context.fillRect(x + 6, y, 5, 3);
+  context.fillRect(x + 11, y + (variant ? 3 : 2), 5, 3);
+  context.fillStyle = TOWN_PALETTE.sun;
+  context.fillRect(x + 2, y + 4, 1, 1);
+  context.fillRect(x + 8, y + 2, 1, 1);
+  context.fillRect(x + 13, y + 4, 1, 1);
+}
+
+function drawLamp(context: CanvasRenderingContext2D, x: number, y: number, frame: number): void {
+  context.fillStyle = TOWN_PALETTE.outline;
+  context.fillRect(x, y, 2, 12);
+  context.fillRect(x - 3, y + 11, 8, 2);
+  context.fillRect(x - 1, y - 4, 4, 4);
+  context.fillStyle = frame % 4 === 0 ? TOWN_PALETTE.sun : TOWN_PALETTE.gold;
+  context.fillRect(x, y - 3, 2, 2);
+}
+
+function drawBench(context: CanvasRenderingContext2D, x: number, y: number): void {
+  context.fillStyle = TOWN_PALETTE.outline;
+  context.fillRect(x, y, 17, 3);
+  context.fillRect(x + 2, y + 3, 2, 5);
+  context.fillRect(x + 13, y + 3, 2, 5);
+  context.fillStyle = TOWN_PALETTE.wallShade;
+  context.fillRect(x + 1, y + 1, 15, 1);
 }
 
 function drawDistrictSigns(context: CanvasRenderingContext2D): void {
@@ -269,7 +357,7 @@ function drawBuilding(
   ], TOWN_PALETTE.pathLight);
   context.fillStyle = spec.wallColor;
   context.fillRect(x + 1, wallY, width - 2, wallHeight);
-  context.fillStyle = "#ffe6c2";
+  context.fillStyle = TOWN_PALETTE.wallHighlight;
   context.fillRect(x + 2, wallY + 1, 2, wallHeight - 2);
   context.fillStyle = "#f8e3c1";
   context.fillRect(x + 5, wallY + 2, width - 11, 2);
@@ -286,6 +374,7 @@ function drawBuilding(
   context.fillStyle = TOWN_PALETTE.outline;
   context.fillRect(x - 2, wallY - 2, width + 4, 2);
   drawDoorAndWindows(context, x, wallY, width, wallHeight, spec.litWindows);
+  drawFacadeDetails(context, x, wallY, width, wallHeight, building.architectureVariant, accent);
   drawLanguageSign(
     context,
     x + Math.floor(width / 2) - 4,
@@ -343,6 +432,8 @@ function drawRoof(
     context.fillRect(x - 2, top + 2, width + 4, wallY - top + 1);
     context.fillStyle = roofColor;
     context.fillRect(x, top + 3, width, Math.max(4, wallY - top - 2));
+    context.fillStyle = TOWN_PALETTE.roofHighlight;
+    context.fillRect(x + 2, top + 4, Math.max(4, width - 9), 2);
     context.fillStyle = TOWN_PALETTE.roofShade;
     context.fillRect(x + width - 5, top + 4, 4, Math.max(3, wallY - top - 4));
     context.fillStyle = TOWN_PALETTE.gold;
@@ -354,6 +445,42 @@ function drawRoof(
   polygon(context, [[x - 3, wallY], [peakX, top], [x + width + 3, wallY]], TOWN_PALETTE.outline);
   polygon(context, [[x - 1, wallY - 1], [peakX, top + 2], [center, wallY - 1]], roofColor);
   polygon(context, [[center, wallY - 1], [peakX, top + 2], [x + width + 1, wallY - 1]], TOWN_PALETTE.roofShade);
+  context.fillStyle = TOWN_PALETTE.roofHighlight;
+  context.fillRect(Math.min(peakX, center - 2), top + 3, 4, 2);
+}
+
+function drawFacadeDetails(
+  context: CanvasRenderingContext2D,
+  x: number,
+  wallY: number,
+  width: number,
+  wallHeight: number,
+  variant: 0 | 1 | 2,
+  accent: string,
+): void {
+  context.fillStyle = TOWN_PALETTE.wallShade;
+  context.fillRect(x + width - 4, wallY + 4, 2, Math.max(4, wallHeight - 8));
+  context.fillStyle = TOWN_PALETTE.wallHighlight;
+  context.fillRect(x + 4, wallY + 4, 2, Math.max(4, wallHeight - 8));
+
+  const boxY = wallY + wallHeight - 2;
+  const boxXs = [x + 4, x + width - 12];
+  boxXs.forEach((boxX, index) => {
+    context.fillStyle = TOWN_PALETTE.outline;
+    context.fillRect(boxX, boxY, 8, 3);
+    context.fillStyle = index === 0 ? accent : TOWN_PALETTE.grassDark;
+    context.fillRect(boxX + 1, boxY - 1, 6, 2);
+    context.fillStyle = TOWN_PALETTE.grassLight;
+    context.fillRect(boxX + 2, boxY - 2, 2, 2);
+    context.fillRect(boxX + 5, boxY - 2, 2, 2);
+  });
+
+  if (variant === 1) {
+    context.fillStyle = accent;
+    context.fillRect(x + 3, wallY + 3, width - 7, 1);
+    context.fillStyle = TOWN_PALETTE.gold;
+    context.fillRect(x + Math.floor(width / 2) - 3, wallY + wallHeight - 6, 6, 1);
+  }
 }
 
 function drawDoorAndWindows(

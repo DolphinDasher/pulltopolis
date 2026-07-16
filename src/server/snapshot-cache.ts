@@ -34,23 +34,31 @@ interface SnapshotCacheRow {
 export class SnapshotCache {
   constructor(private readonly database: AppDatabase) {}
 
-  get<T>(key: SnapshotCacheKey, now = new Date()): SnapshotCacheHit<T> | null {
+  async get<T>(key: SnapshotCacheKey, now = new Date()): Promise<SnapshotCacheHit<T> | null> {
     const login = normalizeLogin(key.login);
     const schemaVersion = requireVersion(key.schemaVersion, "schemaVersion");
     const mappingVersion = requireVersion(key.mappingVersion, "mappingVersion");
-    const row = this.database
-      .prepare(
-        `SELECT login, schema_version, mapping_version, payload_json, source_updated_at,
-                stored_at, soft_expires_at, hard_expires_at, rate_limit_json
-           FROM snapshot_cache
-          WHERE login = ? AND schema_version = ? AND mapping_version = ?`,
-      )
-      .get(login, schemaVersion, mappingVersion) as SnapshotCacheRow | undefined;
+    const result = await this.database.execute({
+      sql: `SELECT login, schema_version, mapping_version, payload_json, source_updated_at,
+                   stored_at, soft_expires_at, hard_expires_at, rate_limit_json
+              FROM snapshot_cache
+             WHERE login = ? AND schema_version = ? AND mapping_version = ?`,
+      args: [login, schemaVersion, mappingVersion],
+    });
+    const row = result.rows[0] as unknown as SnapshotCacheRow | undefined;
     if (!row) return null;
 
     const nowMs = now.getTime();
     if (!Number.isFinite(nowMs)) throw new TypeError("now must be a valid date");
-    if (nowMs >= parseTime(row.hard_expires_at, "hard_expires_at")) return null;
+    if (nowMs >= parseTime(row.hard_expires_at, "hard_expires_at")) {
+      await this.database.execute({
+        sql: `DELETE FROM snapshot_cache
+                WHERE login = ? AND schema_version = ? AND mapping_version = ?
+                  AND hard_expires_at = ?`,
+        args: [login, schemaVersion, mappingVersion, row.hard_expires_at],
+      });
+      return null;
+    }
 
     return {
       login: row.login,
@@ -68,7 +76,7 @@ export class SnapshotCache {
     };
   }
 
-  put<T>(entry: SnapshotCacheWrite<T>): void {
+  async put<T>(entry: SnapshotCacheWrite<T>): Promise<void> {
     const storedAt = parseTime(entry.storedAt, "storedAt");
     const softExpiresAt = parseTime(entry.softExpiresAt, "softExpiresAt");
     const hardExpiresAt = parseTime(entry.hardExpiresAt, "hardExpiresAt");
@@ -76,21 +84,19 @@ export class SnapshotCache {
       throw new RangeError("Cache times must satisfy storedAt <= softExpiresAt <= hardExpiresAt");
     }
 
-    this.database
-      .prepare(
-        `INSERT INTO snapshot_cache (
-           login, schema_version, mapping_version, payload_json, source_updated_at,
-           stored_at, soft_expires_at, hard_expires_at, rate_limit_json
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON CONFLICT(login, schema_version, mapping_version) DO UPDATE SET
-           payload_json = excluded.payload_json,
-           source_updated_at = excluded.source_updated_at,
-           stored_at = excluded.stored_at,
-           soft_expires_at = excluded.soft_expires_at,
-           hard_expires_at = excluded.hard_expires_at,
-           rate_limit_json = excluded.rate_limit_json`,
-      )
-      .run(
+    await this.database.execute({
+      sql: `INSERT INTO snapshot_cache (
+              login, schema_version, mapping_version, payload_json, source_updated_at,
+              stored_at, soft_expires_at, hard_expires_at, rate_limit_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(login, schema_version, mapping_version) DO UPDATE SET
+              payload_json = excluded.payload_json,
+              source_updated_at = excluded.source_updated_at,
+              stored_at = excluded.stored_at,
+              soft_expires_at = excluded.soft_expires_at,
+              hard_expires_at = excluded.hard_expires_at,
+              rate_limit_json = excluded.rate_limit_json`,
+      args: [
         normalizeLogin(entry.login),
         requireVersion(entry.schemaVersion, "schemaVersion"),
         requireVersion(entry.mappingVersion, "mappingVersion"),
@@ -100,7 +106,18 @@ export class SnapshotCache {
         entry.softExpiresAt,
         entry.hardExpiresAt,
         entry.rateLimit === undefined ? null : JSON.stringify(entry.rateLimit),
-      );
+      ],
+    });
+  }
+
+  async purgeExpired(now = new Date()): Promise<number> {
+    const nowMs = now.getTime();
+    if (!Number.isFinite(nowMs)) throw new TypeError("now must be a valid date");
+    const result = await this.database.execute({
+      sql: "DELETE FROM snapshot_cache WHERE julianday(hard_expires_at) <= julianday(?)",
+      args: [now.toISOString()],
+    });
+    return result.rowsAffected;
   }
 }
 

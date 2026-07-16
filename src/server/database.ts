@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
-import Database from "better-sqlite3";
+import { createClient, type Client } from "@libsql/client";
 
 const DATABASE_VERSION = 1;
 const CREATE_SNAPSHOT_CACHE = `
@@ -19,29 +20,50 @@ const CREATE_SNAPSHOT_CACHE = `
   ) STRICT
 `;
 
-export type AppDatabase = Database.Database;
+export type AppDatabase = Client;
 
-export function openDatabase(filename: string): AppDatabase {
-  if (filename !== ":memory:") fs.mkdirSync(path.dirname(filename), { recursive: true });
-  const database = new Database(filename);
+export interface OpenDatabaseOptions {
+  url?: string;
+  authToken?: string;
+}
+
+export async function openDatabase(
+  filename: string,
+  options: OpenDatabaseOptions = {},
+): Promise<AppDatabase> {
+  const databaseUrl = options.url ?? localDatabaseUrl(filename);
+  const database = createClient({
+    url: databaseUrl,
+    ...(options.authToken ? { authToken: options.authToken } : {}),
+  });
 
   try {
-    database.pragma("journal_mode = WAL");
-    database.pragma("foreign_keys = ON");
-    const version = database.pragma("user_version", { simple: true }) as number;
+    if (!options.url && filename !== ":memory:") {
+      await database.execute("PRAGMA journal_mode = WAL");
+    }
+    await database.execute("PRAGMA foreign_keys = ON");
+    const versionResult = await database.execute("PRAGMA user_version");
+    const version = Number(versionResult.rows[0]?.user_version ?? 0);
     if (version > DATABASE_VERSION) {
       throw new Error(
         `Database version ${version} is newer than supported version ${DATABASE_VERSION}`,
       );
     }
 
-    database.transaction(() => {
-      database.exec(CREATE_SNAPSHOT_CACHE);
-      if (version < DATABASE_VERSION) database.pragma(`user_version = ${DATABASE_VERSION}`);
-    })();
+    const statements = [{ sql: CREATE_SNAPSHOT_CACHE }];
+    if (version < DATABASE_VERSION) {
+      statements.push({ sql: `PRAGMA user_version = ${DATABASE_VERSION}` });
+    }
+    await database.batch(statements, "write");
     return database;
   } catch (error) {
     database.close();
     throw error;
   }
+}
+
+function localDatabaseUrl(filename: string): string {
+  if (filename === ":memory:") return filename;
+  fs.mkdirSync(path.dirname(filename), { recursive: true });
+  return pathToFileURL(filename).href;
 }

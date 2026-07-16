@@ -5,7 +5,7 @@ import { createRuntime } from "./runtime.js";
 import { TOWN_SNAPSHOT_RUNTIME_OPTIONS } from "./town-runtime.js";
 
 const config = loadConfig();
-const runtime = createRuntime(config, {
+const runtime = await createRuntime(config, {
   townSnapshots: TOWN_SNAPSHOT_RUNTIME_OPTIONS,
   staticDirectory: path.resolve("dist/client"),
 });

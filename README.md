@@ -139,7 +139,8 @@ The SVG is a saved snapshot, not a live hosted badge. When you want the card to 
 - Pointer and keyboard repository selection kept in sync
 - Responsive layout and `prefers-reduced-motion` support
 - Safe loading, not-found, GitHub outage, and rate-limit states
-- Local SQLite fresh/stale caching and single-flight GitHub refreshes
+- Public request throttling and security headers for hosted deployments
+- SQLite-compatible local/hosted fresh/stale caching and single-flight GitHub refreshes
 - One production process serving both the UI and API
 
 Starlight cannot be spent yet. The animal shop, purchases, saved companions, and desktop pet are future ideas, so the starter cat is currently free for everyone.
@@ -177,7 +178,7 @@ The mapper uses the snapshot timestamp and stable IDs instead of the current wal
 | Town renderer | Native Canvas 2D |
 | Server | Express 5 and native `fetch` |
 | GitHub data | GraphQL-first adapter with serial pagination and rate-limit protection |
-| Cache | Local SQLite through `better-sqlite3` |
+| Cache | SQLite-compatible persistence through `@libsql/client` (local file or Turso) |
 | Tests | Node's built-in test runner through `tsx` |
 | Production | Compiled Express server serving the Vite build and `/api` from one process |
 
@@ -198,7 +199,7 @@ There is intentionally no React, game engine, ORM, GraphQL server, user account 
 | `GET /api/health` | Reports server, GitHub-token, and database readiness without revealing secrets |
 | `GET /api/towns/:login` | Returns the validated `TownSnapshot` JSON for a public user |
 
-Town responses include `X-PullTopolis-Cache: fresh`, `stale`, or `refreshed`. API failures use small typed JSON errors instead of copying GitHub's upstream error text into responses.
+Town responses include `X-PullTopolis-Cache: fresh`, `stale`, or `refreshed`. API failures use small typed JSON errors instead of copying GitHub's upstream error text into responses. Public town requests are bounded by an in-process per-IP and per-login throttle; limits return `429 {"error":"rate_limited"}` with `Retry-After` and are not persisted.
 
 ### Project structure
 
@@ -227,6 +228,12 @@ All runtime settings are server-side:
 | `HOST` | `127.0.0.1` | Express bind address |
 | `PORT` | `3000` | Express/API port |
 | `DATABASE_PATH` | `data/pulltopolis.sqlite` | Local SQLite cache path |
+| `TURSO_DATABASE_URL` | none | Optional hosted libSQL/Turso URL; must be paired with `TURSO_AUTH_TOKEN` |
+| `TURSO_AUTH_TOKEN` | none | Server-only hosted database token; must be paired with `TURSO_DATABASE_URL` |
+| `TRUST_PROXY` | `0` | Number of trusted proxy hops; Render uses `1` in `render.yaml` |
+| `REQUEST_WINDOW_MS` | `60000` | Public town-request throttle window |
+| `REQUEST_LIMIT_PER_IP` | `60` | Maximum town requests per IP per window |
+| `REQUEST_LIMIT_PER_LOGIN` | `20` | Maximum town requests per login per window |
 | `GITHUB_REQUEST_TIMEOUT_MS` | `10000` | GitHub request timeout |
 | `GITHUB_RATE_LIMIT_RESERVE` | `100` | Remaining GraphQL points protected from use |
 
@@ -287,12 +294,12 @@ If a token is ever committed or shared, revoke it immediately and create a repla
 - Only 12 repositories are drawn as buildings; exact overflow counts remain visible.
 - Contributed-building recency describes the repository, not necessarily the viewed user's latest action.
 - Starlight is earned/display-only and companion ownership is not persisted.
-- The local SQLite cache assumes one process and a persistent filesystem.
+- Local development uses SQLite file persistence; hosted deployments should use the optional Turso/libSQL configuration because free application-host filesystems are ephemeral.
 - There is no hosted demo or live image endpoint yet.
 
 ## Roadmap
 
-- Evaluate a free hosted version after request throttling, durable storage, deployment configuration, and public verification
+- Complete public-host throttling, deployment configuration, and public verification
 - Add a Starlight-funded animal shop with deliberately designed pricing and persistence
 - Let people equip and save companions
 - Explore a desktop companion connected to GitHub activity

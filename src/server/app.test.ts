@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { createApp } from "./app.js";
 import { GitHubRateLimitError, GitHubUserNotFoundError } from "./github/index.js";
+import { RequestThrottle } from "./request-throttle.js";
 
 test("health endpoint reports capability state without secrets", async () => {
   const app = createApp({ githubConfigured: true, databaseReady: true });
@@ -18,11 +19,37 @@ test("health endpoint reports capability state without secrets", async () => {
     assert.equal(response.status, 200);
     assert.deepEqual(body, { status: "ok", github: "configured", database: "ready" });
     assert.doesNotMatch(JSON.stringify(body), /token/i);
+    assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+    assert.equal(response.headers.get("x-frame-options"), "DENY");
+    assert.match(response.headers.get("content-security-policy") ?? "", /default-src 'self'/);
   } finally {
     await new Promise<void>((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve())),
     );
   }
+});
+
+test("town endpoint returns a typed 429 after the public throttle is exceeded", async () => {
+  const app = createApp(
+    { githubConfigured: true, databaseReady: true },
+    {
+      requestThrottle: new RequestThrottle({
+        windowMs: 60_000,
+        perIpLimit: 2,
+        perLoginLimit: 10,
+      }),
+      townSnapshots: {
+        get: async () => ({ snapshot: { schemaVersion: 1 }, cacheStatus: "fresh" }),
+      },
+    },
+  );
+
+  assert.equal((await request(app, "/api/towns/octocat")).status, 200);
+  assert.equal((await request(app, "/api/towns/octocat")).status, 200);
+  const limited = await request(app, "/api/towns/octocat");
+  assert.equal(limited.status, 429);
+  assert.equal(limited.headers.get("retry-after"), "60");
+  assert.deepEqual(await limited.json(), { error: "rate_limited" });
 });
 
 test("town endpoint returns only the mapped snapshot contract", async () => {
