@@ -5,6 +5,13 @@ import { pathToFileURL } from "node:url";
 import { createClient, type Client } from "@libsql/client";
 
 const DATABASE_VERSION = 1;
+const DATABASE_VERSION_KEY = "database_version";
+const CREATE_DATABASE_META = `
+  CREATE TABLE IF NOT EXISTS pulltopolis_meta (
+    key TEXT PRIMARY KEY,
+    value INTEGER NOT NULL
+  ) STRICT
+`;
 const CREATE_SNAPSHOT_CACHE = `
   CREATE TABLE IF NOT EXISTS snapshot_cache (
     login TEXT NOT NULL COLLATE NOCASE,
@@ -42,17 +49,26 @@ export async function openDatabase(
       await database.execute("PRAGMA journal_mode = WAL");
     }
     await database.execute("PRAGMA foreign_keys = ON");
-    const versionResult = await database.execute("PRAGMA user_version");
-    const version = Number(versionResult.rows[0]?.user_version ?? 0);
+    await database.execute(CREATE_DATABASE_META);
+    const version = options.url
+      ? await readHostedDatabaseVersion(database)
+      : await readLocalDatabaseVersion(database);
     if (version > DATABASE_VERSION) {
       throw new Error(
         `Database version ${version} is newer than supported version ${DATABASE_VERSION}`,
       );
     }
 
-    const statements = [{ sql: CREATE_SNAPSHOT_CACHE }];
-    if (version < DATABASE_VERSION) {
-      statements.push({ sql: `PRAGMA user_version = ${DATABASE_VERSION}` });
+    const statements = [
+      { sql: CREATE_SNAPSHOT_CACHE },
+      {
+        sql: `INSERT INTO pulltopolis_meta (key, value) VALUES (?, ?)
+              ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+        args: [DATABASE_VERSION_KEY, DATABASE_VERSION],
+      },
+    ];
+    if (!options.url && version < DATABASE_VERSION) {
+      statements.splice(1, 0, { sql: `PRAGMA user_version = ${DATABASE_VERSION}` });
     }
     await database.batch(statements, "write");
     return database;
@@ -60,6 +76,19 @@ export async function openDatabase(
     database.close();
     throw error;
   }
+}
+
+async function readLocalDatabaseVersion(database: AppDatabase): Promise<number> {
+  const result = await database.execute("PRAGMA user_version");
+  return Number(result.rows[0]?.user_version ?? 0);
+}
+
+async function readHostedDatabaseVersion(database: AppDatabase): Promise<number> {
+  const result = await database.execute({
+    sql: "SELECT value FROM pulltopolis_meta WHERE key = ?",
+    args: [DATABASE_VERSION_KEY],
+  });
+  return Number(result.rows[0]?.value ?? 0);
 }
 
 function localDatabaseUrl(filename: string): string {
